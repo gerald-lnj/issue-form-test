@@ -1,0 +1,36 @@
+name: Deploy
+
+on:
+  push:
+    paths-ignore:
+      - '*.md'
+    branches:
+      - master
+
+env:
+  environment_mode: ${{ github.ref_name == 'master' && 'Dev' || startsWith(github.ref_name, 'qa' && 'Qa') || startsWith(github.ref_name, 'prod' && 'Prod')}}
+  environment_id: ${{ github.ref_name == 'qa-it' && 'It' || github.ref_name == 'prod-sf' && 'Sf' || (github.ref_name == 'master' || github.ref_name == 'prod-us1') && 'Us1' || github.ref_name == 'prod-eu1' && 'Eu1' || github.ref_name == 'prod-ap1' && 'Ap1'}}
+  version: ${{ github.sha }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
+    concurrency: deploy-${{ github.env.environment_mode}}${{ github.env.environment_id}}
+
+    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+    # see https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
+    permissions:
+      id-token: write
+      contents: read
+
+    environment:
+      name: ${{ github.env.environment_mode }}${{github.env.environment_id}}
+
+    steps:
+      - name: Dump GitHub context
+        run: echo '${{ toJSON(github) }}'
+
+      - name: Dump GitHub vars
+        run: echo '${{ toJSON(vars) }}'
