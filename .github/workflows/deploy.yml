@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#concurrency
-    concurrency: deploy-${{ github.env.environment_mode}}${{ github.env.environment_id}}
+    concurrency: ${{ format('deploy-{0}{1}', github.env.environment_mode, github.env.environment_id) }}
 
     # These permissions are needed to interact with GitHub's OIDC Token endpoint.
     # see https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
@@ -26,11 +26,11 @@ jobs:
       contents: read
 
     environment:
-      name: ${{join('DevUs1', '')}}
+      name: ${{ format('{0}{1}', github.ref_name == 'master' && 'Dev' || startsWith(github.ref_name, 'qa' && 'Qa') || startsWith(github.ref_name, 'prod' && 'Prod'), github.ref_name == 'qa-it' && 'It' || github.ref_name == 'prod-sf' && 'Sf' || (github.ref_name == 'master' || github.ref_name == 'prod-us1') && 'Us1' || github.ref_name == 'prod-eu1' && 'Eu1' || github.ref_name == 'prod-ap1' && 'Ap1') }}
 
     steps:
       - name: Dump GitHub context
-        run: echo '${{ toJSON(github) }}'
+        run: echo '${{ toJSON(env) }}'
 
       - name: Dump GitHub vars
         run: echo '${{ toJSON(vars) }}'
