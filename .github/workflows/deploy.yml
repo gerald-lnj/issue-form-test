@@ -26,7 +26,7 @@ jobs:
       contents: read
 
     environment:
-      name: ${{ github.env.environment_mode }}${{github.env.environment_id}}
+      name: DevUs1
 
     steps:
       - name: Dump GitHub context
