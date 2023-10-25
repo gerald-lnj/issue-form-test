@@ -26,7 +26,7 @@ jobs:
       contents: read
 
     environment:
-      name: DevUs1
+      name: ${{join('DevUs1', '')}}
 
     steps:
       - name: Dump GitHub context
